@@ -1,7 +1,5 @@
+"""Contains functions that are used for generating plots.
 """
-"""
-
-#%matplotlib inline
 
 import os
 import numpy as np
@@ -10,9 +8,8 @@ import pickle
 from collections import Counter
 from gensim.models import Word2Vec
 import tsne
-#from procrustes import procrustes
 
-"""
+"""Given all the words and their vectors, print the corresponding plot.
 """
 def showEvolution(pt1, pt2, label, data1, data2, label1, label2):
     fig = plt.figure()
@@ -35,14 +32,20 @@ def showEvolution(pt1, pt2, label, data1, data2, label1, label2):
     plt.yticks([])
     plt.show()
 
-"""
+"""Given two models of different periods, a word and the number of neighbours, use showEvolution for plotting a graphic.
 """
 def visualizeWord(mod1, mod2, word, n):
     if word in mod1.vocab and word in mod2.vocab:
-        #find old emplacement of word 
+        # find old emplacement of word 
         pt1 = mod1[word]
-        #find neighbours of that place
-        label1 = [label for label, p in mod2.most_similar(positive=[pt1], topn=n)]
+        # find neighbours of that place
+        label1 = [label for label, p in mod2.most_similar(positive=[pt1], topn=n+1)]
+        # because that place is in not the specific word, we could find it in the resulting neighbour so we make sure it
+        # doesn't happen
+        if word in label1:
+            label1.remove(word)
+        else:
+            label1 = label1[:-1]
         data1 = mod2[label1]
         #print recent word
         pt2 = mod2[word]

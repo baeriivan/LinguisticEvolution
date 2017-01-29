@@ -1,14 +1,13 @@
-"""
+"""Contains various functions to create models from pkl files.
 """
 
 import os
 import numpy as np
 import pickle
 from gensim.models import Word2Vec
-#from procrustes import procrustes
-
 from scipy.linalg import orthogonal_procrustes
-"""
+
+"""Given the pickle path (.pkl), loda the data.
 """
 def loadYear(pickle_path):
     with open( pickle_path, "rb" ) as f:
@@ -19,7 +18,7 @@ def loadYear(pickle_path):
             data.append(article)
     return data
 
-"""
+"""Load a set of pickle files per year in a certain range (using loadYear multiple times).
 """
 def loadYears(pickle_path, years):
     data = []
@@ -32,13 +31,15 @@ def loadYears(pickle_path, years):
             print(file + " doesn't exist.")
     return data
 
-"""
+"""Return a model from data using our best set of parameters.
 """
 def createModel(data):
-    return Word2Vec(data, size=300, window=4, min_count=50, workers=4, sg=1, negative=1)
+    # those parameters are well explained here: https://radimrehurek.com/gensim/models/word2vec.html
+    # negative : state of many noisewords should be drawn
+    return Word2Vec(data, size=300, window=4, min_count=50, workers=4, sg=1, negative=10)
 
 
-"""
+"""Create a transformation matrix to change the axis from the first model to be oriented in the same directions as the second model. Only the words present in both datasets are kept.
 """
 def createTransformationMatrix(modelA, modelB):
     # initialize the matrices
@@ -60,7 +61,7 @@ def createTransformationMatrix(modelA, modelB):
     TransM, _ = orthogonal_procrustes(np.asarray(A), np.asarray(B), check_finite=False) 
 
     Z = np.matmul(A, TransM)
-    # create the 2 models manually
+    # create the 2 models manually (by first creating a text file and reading it).
     constructModel(np.asarray(Z), labels, "tmpZ.model.txt")
     constructModel(np.asarray(B), labels, "tmpB.model.txt")
     
