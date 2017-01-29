@@ -60,9 +60,16 @@ def createTransformationMatrix(modelA, modelB):
     #d, Z, tform = procrustes(np.asarray(B), np.asarray(A), scaling=False, reflection=True)
     TransM, _ = orthogonal_procrustes(np.asarray(A), np.asarray(B), check_finite=False) 
 
-    Z = np.matmul(A, TransM)
+    #we create the entire matrix of modelA
+    label_M = []
+    M = []
+    for i in range(0,nb_words_A):
+        word = modelA.index2word[i]
+        M.append(modelA[word])
+        label_M.append(word)
+    Z = np.matmul(M, TransM)
     # create the 2 models manually (by first creating a text file and reading it).
-    constructModel(np.asarray(Z), labels, "tmpZ.model.txt")
+    constructModel(np.asarray(Z), label_M, "tmpZ.model.txt")
     constructModel(np.asarray(B), labels, "tmpB.model.txt")
     
     modelZ_ = Word2Vec.load_word2vec_format('tmpZ.model.txt', binary=False)
