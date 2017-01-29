@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pickle
 from gensim.models import Word2Vec
-from procrustes import procrustes
+#from procrustes import procrustes
 
 from scipy.linalg import orthogonal_procrustes
 """

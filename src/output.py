@@ -10,7 +10,7 @@ import pickle
 from collections import Counter
 from gensim.models import Word2Vec
 import tsne
-from procrustes import procrustes
+#from procrustes import procrustes
 
 """
 """
