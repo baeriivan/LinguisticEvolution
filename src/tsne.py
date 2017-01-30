@@ -95,7 +95,7 @@ def pca(X = Math.array([]), no_dims = 50):
 	return Y;
 
 
-def tsne(X = Math.array([]), no_dims = 2, initial_dims = 50, perplexity = 30.0):
+def tsne(X = Math.array([]), no_dims = 2, initial_dims = 50, perplexity = 40.0):
 	"""Runs t-SNE on the dataset in the NxD array X to reduce its dimensionality to no_dims dimensions.
 	The syntaxis of the function is Y = tsne.tsne(X, no_dims, perplexity), where X is an NxD NumPy array."""
 
