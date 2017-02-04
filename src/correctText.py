@@ -1,6 +1,6 @@
-from dictFcts import *
-from helpers import *
-import pickle
+from dictFunctions import *
+from load import *
+import pickle, os
 from nltk.corpus import stopwords
 
 # arbitrary values to remove words with less than these occurences
@@ -8,13 +8,14 @@ occs_merged1  = [5,5,5,10,10,10,10,10]
 occs_merged2  = [15,15,15,25,25,50,50,50]
 occs_merged3  = [50,50,50,100,100,100,200,200]
 
-# Creating cleaned dictionaries by removing the less frequent occurences
-year = 1810
-fileName = 'data/dico/10yearsGDL/'+ str(year) + '-' + str(year + 10) + '.pkl'
-dico_10years = load_dictionary(fileName)
-dico_10year_merged1 = clean_dict_by_occ(dico_10years, occs_merged1)
-dico_10year_merged2 = clean_dict_by_occ(dico_10years, occs_merged2)
-dico_10year_merged3 = clean_dict_by_occ(dico_10years, occs_merged3)
+# Creating three cleaned dictionaries by removing the less frequent occurences from a single dictionary
+def clean_dictionary(filePath):
+    dict_10years = load_dictionary(filePath)
+    dict_10years_merged1 = clean_dict_by_occ(dict_10years, occs_merged1)
+    dict_10years_merged2 = clean_dict_by_occ(dict_10years, occs_merged2)
+    dict_10years_merged3 = clean_dict_by_occ(dict_10years, occs_merged3)
+    return [dict_10years_merged1, dict_10years_merged2, dict_10years_merged3]
+
 
 
 def words(text): return re.findall(r'[A-zÀ-ÿ\-]+', text.lower())
@@ -79,21 +80,24 @@ def cleanArticles(text_data, merged_1, merged_2, merged_3):
     return list_merged3
 
 # Main script to clean articles
-year_s = 1840
-year_e = 1850
-testYears = range(year_s,year_e)
-testData = loadYears('data/raw/GDL_pkl/', testYears)
+def cleanAndSaveArticles(DIR_DATA_PKL_FILES, DIR_OUTPUT_PKL_FILES, year_start, year_end, dictionnaries):
+    years = range(year_start,year_end)
+    testData = loadYears(DIR_DATA_PKL_FILES, years)
 
-articles = []
-i = 0
-for article in testData:
-    if i%100 == 0:
-        print(str(i) + ' articles cleaned, ' + str(len(testData)-i) + ' remaining')
-    article = cleanArticles(article, dico_10year_merged1, dico_10year_merged2, dico_10year_merged3)
-    articles.append(article)
-    i+=1
+    if not os.path.exists(DIR_OUTPUT_PKL_FILES):
+        os.makedirs(DIR_OUTPUT_PKL_FILES)
 
-with open('data/cleanedData/' + str(year_s) + '-' + str(year_e) + '.pkl', 'wb') as f:
-    pickle.dump(articles, f, pickle.HIGHEST_PROTOCOL)
+    articles = []
+    i = 0
+    for article in testData:
+        if i%100 == 0:
+            print(str(i) + ' articles cleaned, ' + str(len(testData)-i) + ' remaining')
+        article = cleanArticles(article, dictionnaries[0], dictionnaries[1], dictionnaries[2])
+        articles.append(article)
+        i+=1
 
-print(year_s)
+    filePath = os.path.join(DIR_OUTPUT_PKL_FILES, str(year_start) + '-' + str(year_end) + '.pkl')
+    with open(filePath, 'wb') as f:
+        pickle.dump(articles, f, pickle.HIGHEST_PROTOCOL)
+
+    print(year_start)
