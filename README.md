@@ -9,7 +9,7 @@ question .
 
 ## Data description
 The data, a corpus of archive of the newspaper "Le Temps" between 1800 and 2000, is
-provided by the EPFL. It is said to have a size of approx. 20GB.
+provided by the EPFL. It has a size of approx. 20GB.
 
 ## Deliverables
 - A python notebook explaining how the data was wrangled and cleaned.
@@ -20,8 +20,8 @@ provided by the EPFL. It is said to have a size of approx. 20GB.
 - A poster
 
 ## References
-"Diachronic Word Embeddings Reveal Statistical Laws of Semantic Change" - 2016 - William L. Hamilton, Jure Leskovec, Dan Jurafsky
-"Visualizing Data using t-SNE" - 2008 - Laurens van der Maaten
+- "Diachronic Word Embeddings Reveal Statistical Laws of Semantic Change" - 2016 - William L. Hamilton, Jure Leskovec, Dan Jurafsky
+- "Visualizing Data using t-SNE" - 2008 - Laurens van der Maaten
 
 ## Note
 This readme has been updated from the original version as chosen tools for this project has been reevaluated and the evaluation of risks and the time table is no longer of any use.
