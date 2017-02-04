@@ -6,28 +6,43 @@ from nltk.corpus import stopwords
 
 # Cleaner function to create .pkl files from the raw xml files
 # Perform some cleaning (remove stop words, punctuation and other characters)
-def main():
-    DATA_DIR = 'data/raw'
-    year = 1981
-    
-    stop = set(stopwords.words('french'))
-    stop.update(['ils', 'les', 'plus', 'cette', 'comme', 'tout', 'fait', 'être', 'aussi', 'faire', 'tous', 'dont', 'sans', 'jusqu', 'entre', 'après', 'très', 'après', 'leurs', 'encore', 'eft', 'sous', 'ici', 'deux', 'toutes', 'chez', 'dit', 'peut', 'fur', 'font', 'fera', 'avoir', 'fon', 'fes', 'cet', 'ceux', 'feront', 'quelques', 'contre', 'dès', 'autres', 'celle', 'esl', 'depuis', 'autre', 'autres', 'toute', 'déjà', 'élé'])
+def clean_years(DIR_XML_DATA, DIR_OUTPUT_PKL, year_start, year_end, useStopWords = False):
 
-    while year < 1999:
-        pathR = os.path.join(DATA_DIR, 'JDG', str(year))
+    #DATA_DIR = 'data/raw'
+    year = year_start
+
+    # At first, we used the stopwords to clean the data but we decided to keep them because the removal
+    # of the stopwords induces errors with the t-SNE.
+    if useStopWords:
+        stop = set(stopwords.words('french'))
+        stop.update(['ils', 'les', 'plus', 'cette', 'comme', 'tout', 'fait', 'être', 'aussi', 'faire',
+                    'tous', 'dont', 'sans', 'jusqu', 'entre', 'après', 'très', 'après', 'leurs', 'encore',
+                    'eft', 'sous', 'ici', 'deux', 'toutes', 'chez', 'dit', 'peut', 'fur', 'font', 'fera',
+                    'avoir', 'fon', 'fes', 'cet', 'ceux', 'feront', 'quelques', 'contre', 'dès', 'autres',
+                    'celle', 'esl', 'depuis', 'autre', 'autres', 'toute', 'déjà', 'élé'])
+    else:
+        stop = set()
+
+    if not os.path.exists(DIR_OUTPUT_PKL):
+        os.makedirs(DIR_OUTPUT_PKL)
+
+    while year <= year_end:
+        pathR = os.path.join(DIR_XML_DATA, str(year))
         fileNameW = str(year) + '.pkl'
-        pathW = os.path.join(DATA_DIR, 'JDG_pkl', fileNameW)
+        pathW = os.path.join(DIR_OUTPUT_PKL, fileNameW)
         
-        rawTexts = loadData(pathR)
-        articles = processArticles(rawTexts, stop)
+        rawTexts, articles_total = loadData(pathR)
 
-        with open(pathW, 'wb') as f:
-            pickle.dump(articles, f, pickle.HIGHEST_PROTOCOL)
+        if articles_total > 0:
+            articles = processArticles(rawTexts, stop)
+
+            with open(pathW, 'wb') as f:
+                pickle.dump(articles, f, pickle.HIGHEST_PROTOCOL)
 
         print('Year %s done' % year)
         year += 1
 
-# Load the texts and some metadata for the articles from the xml files
+# Load the texts and some metadata for the articles from the xml files. The metadata are not used (see below)
 def loadData(path):
     raw_texts = []
     labels = []
@@ -48,15 +63,19 @@ def loadData(path):
             textes = xmldata.find_all('full_text')
             textes = [raw_text.text for raw_text in textes]
 
+            # The metadata are not currently used but we can analyze them to
+            # imporove the efficienty of the cleaning by discarding unrelevant
+            # articles from the start.
             metaData = [ articlesID, titles, dates, words_count ]
             labels.append(metaData)
+
             raw_texts.append(textes)
             articles_tot += len(articlesID)
             print('%s articles processed' % articles_tot)
             f.close()
         
     print('Found %s texts.' % len(raw_texts))
-    return raw_texts
+    return raw_texts, articles_tot
 
 # Process the articles by year and remove numbers, punctuation, stopwords and very small words
 def processArticles(raw_texts, stop):
@@ -70,6 +89,3 @@ def processArticles(raw_texts, stop):
             all_articles_by_month.append(words)
         all_articles_by_year.append(all_articles_by_month)
     return all_articles_by_year
-
-if __name__ == '__main__':
-    main()
