@@ -1,4 +1,5 @@
 """Contains various functions to create models from pkl files.
+    The pickle files 
 """
 
 import os
@@ -7,7 +8,8 @@ import pickle
 from gensim.models import Word2Vec
 from scipy.linalg import orthogonal_procrustes
 
-"""Given the pickle path (.pkl), loda the data.
+"""Given the pickle path (.pkl), load the data. Refer to the cleaning of data to understand
+    the format of the pickle files.
 """
 def loadYear(pickle_path):
     with open( pickle_path, "rb" ) as f:
@@ -40,6 +42,7 @@ def createModel(data):
 
 
 """Create a transformation matrix to change the axis from the first model to be oriented in the same directions as the second model. Only the words present in both datasets are kept.
+    It returns 2 models after applying the orthogonal Procrustes algorithm for aligning the axes of both model.    
 """
 def createTransformationMatrix(modelA, modelB):
     # initialize the matrices
@@ -57,30 +60,23 @@ def createTransformationMatrix(modelA, modelB):
             A.append(modelA[word])
             B.append(modelB[word])
     # create the transformation matrix
-    #d, Z, tform = procrustes(np.asarray(B), np.asarray(A), scaling=False, reflection=True)
     TransM, _ = orthogonal_procrustes(np.asarray(A), np.asarray(B), check_finite=False) 
 
-    #we create the entire matrix of modelA
-    #label_M = []
-    #M = []
-    #for i in range(0,nb_words_A):
-    #    word = modelA.index2word[i]
-    #    M.append(modelA[word])
-    #    label_M.append(word)
-    #Z = np.matmul(M, TransM)
-    
+    # apply the transofrmation matrix to the first model matrix
     Z = np.matmul(A, TransM)
 
     # create the 2 models manually (by first creating a text file and reading it).
+    # it would be most efficient not to have to store the results on files like this.
     constructModel(np.asarray(Z), labels, "tmpZ.model.txt")
     constructModel(np.asarray(B), labels, "tmpB.model.txt")
     
     modelZ_ = Word2Vec.load_word2vec_format('tmpZ.model.txt', binary=False)
     modelB_ = Word2Vec.load_word2vec_format('tmpB.model.txt', binary=False)
     
-    return modelZ_, modelB
+    return modelZ_, modelB_
 
-"""Construct a model from the matrix and the labels. (Note that a file will be created !)
+"""Construct a model from the matrix and the labels. (Note that a file will be created,
+    so make sure not to overwrite something that matters.)
 """
 def constructModel(M, labels, filename):
     f = open(filename,'w')
